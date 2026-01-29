@@ -1,5 +1,36 @@
 {
   "name": "vigil-mcp",
+  "version": "1.0.0",
+  "description": "MCP server that exposes Vigil monitoring tools",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "vigil-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "start": "node build/index.js",
+    "dev": "tsc && node build/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "vigil",
+    "monitoring",
+    "status"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3"
+  },
+  "files": [
+    "build"
+  ]
   "version": "0.1.0",
   "description": "MCP server for Vigil scanning and cryptographic signing",
   "main": "index.js",
