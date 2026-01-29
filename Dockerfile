@@ -37,9 +37,27 @@ RUN npm prune --omit=dev
 # Final stage for app image
 FROM base
 
+# Install runtime dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y python3 python3-pip curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install vigil-cryptographicsign Python package
+RUN pip3 install vigil-cryptographicsign --break-system-packages
+
 # Copy built application
 COPY --from=build /app /app
 
-# Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+# Install vigil-scan binary (if available from releases)
+# Note: This URL is a placeholder - replace with actual release URL
+# RUN curl -fsSL https://releases.vigil.ai/vigil-scan-linux -o /usr/local/bin/vigil-scan && \
+#     chmod +x /usr/local/bin/vigil-scan
+
+# This is an MCP server that communicates via stdio, not HTTP
+# To use this in a containerized environment, you'll need to:
+# 1. Run the container interactively: docker run -i vigil-mcp
+# 2. Or use it as part of a larger system that manages stdio communication
+# 3. Or build a bridge server that exposes HTTP and spawns this as a subprocess
+
+# Start the MCP server (listens on stdin/stdout)
+CMD [ "node", "build/index.js" ]

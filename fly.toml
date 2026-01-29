@@ -2,12 +2,20 @@
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
+# NOTE: This file is a placeholder. vigil-mcp is an MCP server that communicates via stdio,
+# not an HTTP service. To deploy on Fly.io, you'll need to:
+# 1. Create an HTTP bridge server that spawns vigil-mcp as a subprocess
+# 2. Update this configuration to point to the bridge server
+# 3. Remove the http_service section if deploying the bridge server
+#
+# See ARCHITECTURE.md for details on deployment models.
 
 app = 'vigil-scan'
 primary_region = 'ams'
 
 [build]
 
+# This configuration assumes an HTTP bridge server (not currently implemented)
 [http_service]
   internal_port = 8080
   force_https = true
