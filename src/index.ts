@@ -46,8 +46,9 @@ function parseScanOutput(stdout: string, target: string): ScanResult {
       summary: parsed.summary || { risk_level: "unknown", total_findings: 0 },
       raw_output: stdout,
     };
-  } catch {
+  } catch (parseError) {
     // If not JSON, return structured format with raw output
+    // This is expected if vigil-scan returns plain text format
     return {
       timestamp,
       target,
@@ -210,7 +211,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               scan_metadata: {
                 tool: "vigil-scan",
                 target,
-                timestamp: scanResult.timestamp,
               }
             }),
           ]);
@@ -230,15 +230,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             ],
           };
         } catch (signError: any) {
-          // If signing fails, return error but include scan results
+          // Signing failed but scan succeeded - return scan results with warning
+          const partialResult = {
+            scan_result: scanResult,
+            signing_error: signError.message,
+            is_tamper_evident: false,
+            warning: "Scan completed successfully but cryptographic signing failed. Results are not tamper-evident.",
+          };
+          
           return {
             content: [
               {
                 type: "text",
-                text: `Scan completed but signing failed: ${signError.message}\n\nScan results:\n${JSON.stringify(scanResult, null, 2)}`,
+                text: JSON.stringify(partialResult, null, 2),
               },
             ],
-            isError: true,
+            // Not marking as error since scan succeeded
           };
         }
       }

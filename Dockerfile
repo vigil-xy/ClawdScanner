@@ -39,11 +39,15 @@ FROM base
 
 # Install runtime dependencies
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y python3 python3-pip curl ca-certificates && \
+    apt-get install --no-install-recommends -y python3 python3-pip python3-venv curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Install vigil-cryptographicsign Python package
-RUN pip3 install vigil-cryptographicsign --break-system-packages
+# Create and activate virtual environment for Python packages
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install vigil-cryptographicsign Python package in virtual environment
+RUN pip3 install vigil-cryptographicsign
 
 # Copy built application
 COPY --from=build /app /app
