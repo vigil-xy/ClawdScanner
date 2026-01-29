@@ -51,7 +51,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Security: API Key authentication
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=True)
-VALID_API_KEYS = set(os.getenv("API_KEYS", "").split(",")) if os.getenv("API_KEYS") else set()
+CONFIGURED_API_KEYS = set(k.strip() for k in os.getenv("API_KEYS", "").split(",") if k.strip()) if os.getenv("API_KEYS") else set()
 
 # Configuration
 MCP_SERVER_PATH = os.getenv("MCP_SERVER_PATH", "/app/build/index.js")
@@ -133,11 +133,13 @@ class HealthResponse(BaseModel):
 # Security: API Key validation
 async def validate_api_key(api_key: str = Security(API_KEY_HEADER)) -> str:
     """Validate API key from header"""
-    if not VALID_API_KEYS:
+    if not CONFIGURED_API_KEYS:
         # If no API keys configured, allow all requests (for development only)
+        import logging
+        logging.warning("⚠️  Running in DEV MODE without API keys - DO NOT use in production!")
         return "dev-mode"
     
-    if api_key not in VALID_API_KEYS:
+    if api_key not in CONFIGURED_API_KEYS:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API key"
@@ -205,6 +207,12 @@ class MCPClient:
                     status_code=status.HTTP_504_GATEWAY_TIMEOUT,
                     detail=f"Tool execution timed out after {timeout} seconds"
                 )
+            except Exception:
+                # Ensure process cleanup on any error
+                if process.returncode is None:
+                    process.kill()
+                    await process.wait()
+                raise
             
             # Check process exit code
             if process.returncode != 0:
@@ -392,39 +400,35 @@ async def scan_signed(
     return SignedScanResponse(**result)
 
 
-@app.post(
-    "/verify",
-    response_model=Dict[str, Any],
-    tags=["Verification"],
-    summary="Verify cryptographic signature",
-    description="Verify a cryptographic signature for a payload."
-)
-@limiter.limit("30/minute")
-async def verify(
-    request: Request,
-    verify_request: VerifyRequest,
-    api_key: str = Security(validate_api_key)
-):
-    """
-    Verify a cryptographic signature.
-    
-    This endpoint invokes the vigil.proof.sign MCP tool to verify signatures.
-    
-    **Rate Limit:** 30 requests per minute per IP
-    
-    **Authentication:** Requires valid API key in X-API-Key header
-    """
-    # Note: The current MCP implementation doesn't have a verify tool,
-    # so this uses the sign tool for demonstration.
-    # In production, you'd want a dedicated verification tool.
-    result = await MCPClient.call_tool(
-        "vigil.proof.sign",
-        {
-            "payload": verify_request.payload,
-            "purpose": verify_request.purpose
-        }
-    )
-    return result
+# NOTE: Verification endpoint is commented out until proper verification is implemented
+# The current MCP implementation only has a signing tool, not a verification tool.
+# Uncomment and update once vigil.proof.verify is available in the MCP server.
+#
+# @app.post(
+#     "/verify",
+#     response_model=Dict[str, Any],
+#     tags=["Verification"],
+#     summary="Verify cryptographic signature",
+#     description="Verify a cryptographic signature for a payload."
+# )
+# @limiter.limit("30/minute")
+# async def verify(
+#     request: Request,
+#     verify_request: VerifyRequest,
+#     api_key: str = Security(validate_api_key)
+# ):
+#     """
+#     Verify a cryptographic signature.
+#     """
+#     result = await MCPClient.call_tool(
+#         "vigil.proof.verify",  # This tool doesn't exist yet
+#         {
+#             "payload": verify_request.payload,
+#             "signature": verify_request.signature,
+#             "purpose": verify_request.purpose
+#         }
+#     )
+#     return result
 
 
 @app.get("/", tags=["Info"])
@@ -440,7 +444,6 @@ async def root():
             "health": "/health",
             "scan": "/scan",
             "scan_signed": "/scan/signed",
-            "verify": "/verify",
             "docs": "/docs",
             "openapi": "/openapi.json"
         },
@@ -457,7 +460,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content=ErrorResponse(
             error=exc.detail,
-            detail=str(exc.detail) if hasattr(exc, 'detail') else None
+            detail=None  # Don't duplicate detail in both fields
         ).dict()
     )
 

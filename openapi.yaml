@@ -34,8 +34,6 @@ tags:
     description: Health check and status endpoints
   - name: Scanning
     description: Security scanning operations (⚠️ Dangerous)
-  - name: Verification
-    description: Cryptographic verification operations
 
 paths:
   /health:
@@ -166,49 +164,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /verify:
-    post:
-      summary: Verify cryptographic signature
-      description: |
-        Verify a cryptographic signature for authenticity.
-        
-        **Rate Limit:** 30 requests/minute per IP
-      operationId: verify
-      tags:
-        - Verification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerifyRequest'
-      responses:
-        '200':
-          description: Verification result
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  valid:
-                    type: boolean
-                    description: Whether the signature is valid
-                  details:
-                    type: object
-                    description: Additional verification details
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized - Invalid API key
           content:
             application/json:
               schema:
