@@ -486,6 +486,6 @@ if __name__ == "__main__":
     
     print(f"Starting Vigil MCP Bridge on {host}:{port}")
     print(f"MCP Server Path: {MCP_SERVER_PATH}")
-    print(f"API Keys: {'Configured' if VALID_API_KEYS else 'NOT CONFIGURED (dev mode)'}")
+    print(f"API Keys: {'Configured' if CONFIGURED_API_KEYS else 'NOT CONFIGURED (dev mode)'}")
     
     uvicorn.run(app, host=host, port=port)

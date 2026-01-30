@@ -1,8 +1,8 @@
-# syntax = docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=22.21.1
-FROM node:${NODE_VERSION}-slim AS base
+ARG NODE_VERSION=22
+FROM node:${NODE_VERSION}-bullseye-slim AS base
 
 LABEL fly_launch_runtime="Node.js"
 
@@ -46,15 +46,19 @@ RUN apt-get update -qq && \
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install vigil-cryptographicsign Python package in virtual environment
-RUN pip3 install vigil-cryptographicsign
+# Install vigil-cryptographicsign Python package (external tool)
+# Note: This package is not available in PyPI - install from your source
+# Uncomment when you have the actual vigil-cryptographicsign package available
+# RUN /opt/venv/bin/pip install --no-cache-dir vigil-cryptographicsign
 
-# Copy built application
-COPY --from=build /app /app
+# Copy built application (only necessary files, not node_modules)
+COPY --from=build /app/package.json /app/package-lock.json /app/
+COPY --from=build /app/build /app/build
+COPY --from=build /app/node_modules /app/node_modules
 
-# Install HTTP bridge dependencies
-COPY bridge/requirements.txt /app/bridge/requirements.txt
-RUN pip3 install -r /app/bridge/requirements.txt
+# Copy bridge server and install dependencies
+COPY bridge/ /app/bridge/
+RUN /opt/venv/bin/pip install --no-cache-dir -r /app/bridge/requirements.txt
 
 # Install vigil-scan binary (if available from releases)
 # Note: This URL is a placeholder - replace with actual release URL
@@ -71,4 +75,4 @@ ENV PORT=8080
 ENV MCP_SERVER_PATH=/app/build/index.js
 
 # Start the HTTP bridge server (spawns MCP server as subprocess)
-CMD [ "python3", "-m", "bridge.server" ]
+CMD ["python3", "-m", "bridge.server"]
