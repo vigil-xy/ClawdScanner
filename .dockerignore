@@ -1,9 +1,56 @@
+# Node.js
 node_modules/
+npm-debug.log
+*.log
+
+# Build artifacts
 build/
 dist/
-*.log
-.DS_Store
 *.tsbuildinfo
-dist/
-*.log
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation (not needed in image)
+*.md
+docs/
+
+# Test files
+test/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CI/CD
+.github/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.pytest_cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
