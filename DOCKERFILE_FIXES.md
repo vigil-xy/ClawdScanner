@@ -19,14 +19,14 @@ The Dockerfile has been audited and corrected for production deployment on Fly.i
 # syntax = docker/dockerfile:1
 ```
 
-**Problem:** Space between `syntax` and `=` is invalid syntax. This can cause build failures on some Docker versions and BuildKit configurations.
+**Problem:** Space between `syntax` and `=` is non-standard syntax. While Docker BuildKit is lenient and accepts this, it's better to follow the canonical format for maximum compatibility and to match Docker best practices documentation.
 
 **Fix:**
 ```dockerfile
 # syntax=docker/dockerfile:1
 ```
 
-**Impact:** Critical - prevents builds on strict parsers.
+**Impact:** Low-Medium - improves compatibility and follows best practices.
 
 ---
 
@@ -40,7 +40,8 @@ FROM node:${NODE_VERSION}-slim AS base
 
 **Problem:** 
 - `node:slim` is based on Debian but lacks full Python toolchain compatibility
-- Specific patch version (22.21.1) creates unnecessary image layer churn
+- Specific patch version (22.21.1) was likely a typo or placeholder (this version doesn't exist in Node.js releases as of 2026)
+- Using major version only (e.g., `22`) is better practice to get latest patches automatically
 - `-slim` variant may have missing dependencies for Python venv
 
 **Fix:**
@@ -99,11 +100,12 @@ COPY --from=build /app /app
 
 **Problem:**
 - Copies ENTIRE `/app` directory including:
-  - Source TypeScript files (`src/`)
-  - `node_modules/` including dev dependencies
-  - Build artifacts like `.tsbuildinfo`
+  - Source TypeScript files (`src/`) 
+  - Build context files (all files from COPY . .)
   - Documentation files (`.md` files)
   - Test files if present
+  - Potentially `.git` directory if not in .dockerignore
+- While `npm prune --omit=dev` removes dev dependencies, the blanket COPY still includes unnecessary source files
 - Increases image size unnecessarily
 - Potential security risk (exposing source code)
 
@@ -497,6 +499,9 @@ Before deploying to production:
 | `Dockerfile` | Fixed syntax, base image, venv, COPY optimization | Critical |
 | `bridge/server.py` | Fixed VALID_API_KEYS → CONFIGURED_API_KEYS | Critical |
 | `.dockerignore` | Comprehensive exclusion list | Medium |
+| `DOCKERFILE_FIXES.md` | Documentation (excluded from image via .dockerignore) | Documentation |
+
+**Note:** The DOCKERFILE_FIXES.md file is intentionally excluded from Docker builds via .dockerignore (*.md pattern) as documentation is not needed in production images. It's part of the repository for team reference.
 
 **Lines changed:** ~30 lines  
 **Build time:** ~30 seconds (cached), ~2 minutes (clean)  
