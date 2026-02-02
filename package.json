@@ -24,8 +24,16 @@
     "security-audit",
     "vulnerability-scanner"
   ],
-  "author": "",
+  "author": "Vygil Security Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vigil-xy/vigil-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vigil-xy/vigil-mcp/issues"
+  },
+  "homepage": "https://github.com/vigil-xy/vigil-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.3",
     "commander": "^12.0.0",
