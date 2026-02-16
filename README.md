@@ -1,12 +1,12 @@
-# Vygil Security Scanner
+# Scanner Claw Security Scanner
 
 **A comprehensive MCP (Model Context Protocol) security scanner for developers and startups**
 
-Vygil performs deep security audits of your system and generates cryptographically signed, tamper-evident reports. It integrates seamlessly with AI assistants like Claude Desktop and Cursor through the Model Context Protocol.
+It performs deep security audits of your system and generates cryptographically signed, tamper-evident reports. It integrates seamlessly with AI assistants like Claude Desktop and Cursor through the Model Context Protocol.
 
-## What is Vygil?
+## What is it?
 
-Vygil is a **production-ready security scanner** designed for:
+It is a **production-ready security scanner** designed for:
 - 🔍 **Comprehensive Security Auditing**: Scans networks, processes, filesystems, dependencies, configurations, and containers
 - 🔐 **Cryptographic Signing**: Every scan report is cryptographically signed using Ed25519 signatures with SHA-256 hashing
 - 🤖 **AI Integration**: Exposes security scanning capabilities to AI assistants via MCP (Model Context Protocol)
@@ -75,7 +75,7 @@ npm link
 
 ### CLI Commands
 
-Vygil provides a powerful command-line interface for security scanning:
+It provides a powerful command-line interface for security scanning:
 
 #### Run a Security Scan
 
@@ -191,7 +191,7 @@ Once configured, your AI assistant will have access to:
 
 Try these prompts with your AI assistant:
 
-- "Use vygil to scan my system for security issues"
+- "Use it to scan my system for security issues"
 - "Run a signed security scan and give me a detailed report"
 - "Check for vulnerabilities on this host"
 - "Scan my development environment and identify any exposed secrets"
@@ -282,7 +282,7 @@ npm run dev
 
 ## Architecture
 
-**Vygil** is a dual-purpose security tool:
+**Scanner Claw** is a dual-purpose security tool:
 
 1. **CLI Scanner**: Standalone command-line tool for comprehensive local security auditing
 2. **MCP Server**: Exposes security scanning capabilities to AI assistants via Model Context Protocol
@@ -320,6 +320,3 @@ Public Key Location: ~/.vigil/keys/public.pem
 
 MIT
 
-## Author
-
-Vygil Security Team
